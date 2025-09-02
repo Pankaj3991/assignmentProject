@@ -1,15 +1,13 @@
-import {NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getDB } from "@/config/db"; // your DB connection helper
 
 const db = await getDB();
 
 // GET /api/schools/123
-export async function GET(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, context: any) {
   try {
-    const {id} = await context.params;
+    const params = await Promise.resolve(context.params);
+    const { id } = params;
     const [rows]: any = await db.query(
       `
       SELECT s.id, s.name, s.address, s.city, s.state, s.contact, s.image, s.email,
@@ -36,11 +34,11 @@ export async function GET(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const schoolId = await params.id;
+    const {id} = await context.params;
     const body = await req.json();
 
     // Allowed fields to update
@@ -73,7 +71,7 @@ export async function PUT(
     // Check school exists and get creator
     const [existing]: any = await db.query(
       `SELECT id, created_by FROM Schools WHERE id = ?`,
-      [schoolId]
+      [id]
     );
     if (!existing.length) {
       return NextResponse.json({ error: "School not found" }, { status: 404 });
@@ -82,7 +80,7 @@ export async function PUT(
 
     // Build and execute update
     const sql = `UPDATE Schools SET ${updates.join(", ")} WHERE id = ?`;
-    values.push(schoolId);
+    values.push(id);
     const [result]: any = await db.query(sql, values);
 
     // Return the updated record
@@ -94,7 +92,7 @@ export async function PUT(
       JOIN Users u ON s.created_by = u.id
       WHERE s.id = ?
       `,
-      [schoolId]
+      [id]
     );
 
     return NextResponse.json(rows[0]);
@@ -109,16 +107,16 @@ export async function PUT(
 
 // DELETE /api/schools/:id
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const schoolId = await params.id;
+    const {id} = await context.params;
 
     // Check school exists and creator
     const [existing]: any = await db.query(
       `SELECT id, created_by FROM Schools WHERE id = ?`,
-      [schoolId]
+      [id]
     );
     if (!existing.length) {
       return NextResponse.json({ error: "School not found" }, { status: 404 });
@@ -126,7 +124,7 @@ export async function DELETE(
     const createdBy = existing[0].created_by;
 
     const [result]: any = await db.query(`DELETE FROM Schools WHERE id = ?`, [
-      schoolId,
+      id,
     ]);
 
     return NextResponse.json({ message: "School deleted" });
