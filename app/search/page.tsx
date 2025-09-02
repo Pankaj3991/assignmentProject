@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense,useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function SearchPage() {
+export default function SearchResults() {
+  return (
+    <Suspense fallback={<p>Loading search...</p>}>
+      <SearchPage />
+    </Suspense>
+  );
+}
+function SearchPage() {
     const searchParams = useSearchParams();
     const query = searchParams.get("query") || "";
 
