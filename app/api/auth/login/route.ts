@@ -13,6 +13,7 @@ export async function POST(req: Request) {
     const db = await getDB();
 
     const [rows]: any = await db.query(
+      
       "SELECT * FROM users WHERE email = ?",
       [email]
     );

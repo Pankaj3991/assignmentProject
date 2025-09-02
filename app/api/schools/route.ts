@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const offset = (page - 1) * limit;
 
     let where = "WHERE 1=1";
-    let params: any[] = [];
+    const params: any[] = [];
 
     if (search) {
       where += " AND (s.name LIKE ? OR s.city LIKE ? OR s.address LIKE ?)";
@@ -72,14 +72,14 @@ export async function POST(req: Request) {
   try {
     const db = await getDB();
     const formData = await req.formData();
-    const name = formData.get("name") as String;
-    const address = formData.get("address") as String;
-    const city = formData.get("city") as String;
-    const state = formData.get("state") as String;
-    const contactValue = formData.get("contact") as String;
+    const name = formData.get("name") as string;
+    const address = formData.get("address") as string;
+    const city = formData.get("city") as string;
+    const state = formData.get("state") as string;
+    const contactValue = formData.get("contact") as string;
     const contact = contactValue ? Number(contactValue) : null;
-    const email = formData.get("file") as File | null;
-    const file = formData.get("image") as String;
+    const email = formData.get("email") as string;
+    const file = formData.get("image") as File | null;
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
