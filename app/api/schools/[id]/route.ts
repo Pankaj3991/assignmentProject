@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+import {NextRequest, NextResponse } from "next/server";
 import { getDB } from "@/config/db"; // your DB connection helper
 
 const db = await getDB();
 
 // GET /api/schools/123
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const schoolId = await params.id;
+    const {id} = await context.params;
     const [rows]: any = await db.query(
       `
       SELECT s.id, s.name, s.address, s.city, s.state, s.contact, s.image, s.email,
@@ -18,7 +18,7 @@ export async function GET(
       JOIN Users u ON s.created_by = u.id
       WHERE s.id = ?
       `,
-      [schoolId]
+      [id]
     );
 
     if (!rows.length) {
